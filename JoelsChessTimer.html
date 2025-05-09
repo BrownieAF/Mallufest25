@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess Timer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      background-color: #f0f0f0;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    #timer {
+      font-size: 48px;
+      margin-bottom: 20px;
+      padding: 10px;
+      border-radius: 10px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    #message {
+      font-size: 32px;
+      color: red;
+      margin-top: 20px;
+    }
+    .flash {
+      animation: flash 0.5s steps(2, start) 6;
+      background-color: red;
+      color: white;
+    }
+
+    .fake-button, .fullscreen-button {
+      font-size: 24px;
+      padding: 10px 20px;
+      cursor: pointer;
+      color: #4CAF50;
+      font-weight: bold;
+      border: 2px solid #4CAF50;
+      border-radius: 5px;
+      margin-top: 30px;
+      text-decoration: none;
+    }
+
+    .fake-button:hover, .fullscreen-button:hover {
+      color: white;
+      background-color: #4CAF50;
+    }
+
+    @keyframes flash {
+      0% { background-color: red; color: white; }
+      50% { background-color: white; color: red; }
+      100% { background-color: red; color: white; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="timer">0:00:00</div>
+  <div id="message"></div>
+  
+  <!-- Fake Start/Reset Button -->
+  <a href="#" class="fake-button" onclick="startOrResetTimer()">Start / Reset</a>
+  
+  <!-- Fullscreen Button -->
+  <a href="#" class="fullscreen-button" id="fullscreenButton" onclick="toggleFullscreen()">Fullscreen</a>
+  
+  <script>
+    let intervalId;
+    let seconds = 0;
+    let milliseconds = 0;
+
+    // Add event listener to the body element to start/reset timer on click anywhere
+    document.body.addEventListener('click', function(event) {
+      // Check if the click is NOT on the fullscreen button or the fake "Start/Reset" button
+      if (!event.target.closest('.fake-button') && event.target !== document.getElementById('fullscreenButton')) {
+        startOrResetTimer();
+      }
+    });
+
+    function startOrResetTimer() {
+      clearInterval(intervalId);
+      seconds = 0;
+      milliseconds = 0;
+      updateDisplay();
+
+      const timerEl = document.getElementById('timer');
+      const messageEl = document.getElementById('message');
+
+      timerEl.classList.remove('flash');
+      timerEl.style.backgroundColor = '';
+      timerEl.style.color = '';
+      messageEl.textContent = '';
+
+      intervalId = setInterval(() => {
+        milliseconds++;
+        if (milliseconds >= 100) {
+          milliseconds = 0;
+          seconds++;
+        }
+        updateDisplay();
+        if (seconds >= 60) {
+          clearInterval(intervalId);
+          timerEl.classList.add('flash');
+          messageEl.textContent = 'Turn finished';
+
+          // Stop flash after 3 seconds (6 flashes at 0.5s each)
+          setTimeout(() => {
+            timerEl.classList.remove('flash');
+            timerEl.style.backgroundColor = '';
+            timerEl.style.color = '';
+          }, 3000);
+        }
+      }, 10); // Update every 10ms
+    }
+
+    function updateDisplay() {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      const ms = milliseconds.toString().padStart(2, '0'); // Ensure milliseconds are always 2 digits
+      document.getElementById('timer').textContent = `${mins}:${secs.toString().padStart(2, '0')}:${ms}`;
+    }
+
+    // Fullscreen functionality
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        // Request full screen on body element
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+          document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
+          document.documentElement.webkitRequestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+          document.documentElement.msRequestFullscreen();
+        }
+      } else {
+        // Exit full screen
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) { // Firefox
+          document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) { // Chrome, Safari and Opera
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { // IE/Edge
+          document.msExitFullscreen();
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
